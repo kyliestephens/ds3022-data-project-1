@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: "Raw taxi data loaded from NYC TLC (2015-2024)"
+    schema: main
+    tables:
+      - name: yellow_tripdata
+        description: "Yellow taxi trips for 2024"
+        columns:
+          - name: VendorID
+            description: "Taxi vendor identifier"
+          - name: tpep_pickup_datetime
+            description: "Pickup datetime"
+          - name: tpep_dropoff_datetime  
+            description: "Dropoff datetime"
+          - name: passenger_count
+            description: "Number of passengers"
+          - name: trip_distance
+            description: "Trip distance in miles"
+          - name: total_amount
+            description: "Total fare amount"
+        
+      - name: green_tripdata
+        description: "Green taxi trips for 2024"
+        columns:
+          - name: VendorID
+            description: "Taxi vendor identifier"
+          - name: lpep_pickup_datetime
+            description: "Pickup datetime"
+          - name: lpep_dropoff_datetime
+            description: "Dropoff datetime"
+          - name: passenger_count
+            description: "Number of passengers"
+          - name: trip_distance
+            description: "Trip distance in miles" 
+          - name: total_amount
+            description: "Total fare amount"
+        
+      - name: vehicle_emissions
+        description: "Vehicle emissions lookup table"
