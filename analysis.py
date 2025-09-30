@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 import logging
 from datetime import datetime
 
-# -----------------------------
-# Logging configuration
-# -----------------------------
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -13,18 +10,36 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# -----------------------------
-# Main analysis function
-# -----------------------------
-
-def carbon_heavy_light_hours():
+def analyzing_cleandata():
     try:
         con = duckdb.connect(database='emissions.duckdb', read_only=False)
         logger.info("Connected to DuckDB")
-        logger.info("4. HOURLY CO2 PATTERNS (1-24 hours by cab type)")
+
+        logger.info("1. SINGLE LARGEST CARBON TRIPS (Yellow & Green)")
         logger.info("-" * 30)
 
         cab_types = ['yellow', 'green']
+
+        for cab in cab_types:
+            largest_trip = con.execute(f"""
+                SELECT 
+                    cab_type,
+                    VendorID,
+                    pickup_datetime,
+                    dropoff_datetime,
+                    trip_distance,
+                    total_amount,
+                    co2_emissions_kg
+                FROM all_data_transformed
+                WHERE cab_type = '{cab}'
+                ORDER BY co2_emissions_kg DESC
+                LIMIT 1;
+            """).fetchdf()
+
+            logger.info(f"Largest {cab.upper()} trip:\n{largest_trip.to_string(index=False)}")
+
+        logger.info("2. HOURLY CO2 PATTERNS (1-24 hours by cab type)")
+        logger.info("-" * 30)
 
         for cab in cab_types:
             logger.info(f"--- {cab.upper()} Taxi ---")
@@ -53,10 +68,9 @@ def carbon_heavy_light_hours():
             logger.info(f"Most carbon-heavy hour: {max_hour[0]:02d}:00 with avg {max_hour[3]:.4f} kg CO2")
             logger.info(f"Least carbon-heavy hour: {min_hour[0]:02d}:00 with avg {min_hour[3]:.4f} kg CO2")
     
-        logger.info("5. WEEKLY CO2 PATTERNS (Sun-Sat by cab type)")
+        logger.info("3. WEEKLY CO2 PATTERNS (Sun-Sat by cab type)")
         logger.info("-" * 30)
 
-        cab_types = ['yellow', 'green']
         days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
         for cab in cab_types:
@@ -86,10 +100,8 @@ def carbon_heavy_light_hours():
             logger.info(f"Most carbon-heavy day: {days[max_day[0]]} with avg {max_day[3]:.4f} kg CO2")
             logger.info(f"Least carbon-heavy day: {days[min_day[0]]} with avg {min_day[3]:.4f} kg CO2")
 
-            logger.info("6. WEEKLY CO2 PATTERNS (Weeks 1-52 by cab type)")
+            logger.info("4. WEEKLY CO2 PATTERNS (Weeks 1-52 by cab type)")
         logger.info("-" * 30)
-
-        cab_types = ['yellow', 'green']
 
         for cab in cab_types:
             logger.info(f"--- {cab.upper()} Taxi ---")
@@ -117,10 +129,9 @@ def carbon_heavy_light_hours():
             logger.info(f"Most carbon-heavy week: Week {max_week[0]} with avg {max_week[3]:.4f} kg CO2")
             logger.info(f"Least carbon-heavy week: Week {min_week[0]} with avg {min_week[3]:.4f} kg CO2")
 
-        logger.info("7. MONTHLY CO2 PATTERNS (Jan-Dec by cab type)")
+        logger.info("5. MONTHLY CO2 PATTERNS (Jan-Dec by cab type)")
         logger.info("-" * 30)
 
-        cab_types = ['yellow', 'green']
         months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -158,8 +169,6 @@ def carbon_heavy_light_hours():
         logger.error(error_msg)
         logger.error(error_msg)
         return False
-    
-import matplotlib.pyplot as plt
 
 def plot_monthly_co2(con):
     try:
@@ -213,6 +222,6 @@ def plot_monthly_co2(con):
 
 # -----------------------------
 if __name__ == "__main__":
-    con = carbon_heavy_light_hours()
+    con = analyzing_cleandata()
     if con:
         plot_monthly_co2(con)

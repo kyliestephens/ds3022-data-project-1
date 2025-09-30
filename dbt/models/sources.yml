@@ -1,8 +1,8 @@
 version: 2
-
+#sources so that the yellow_tripdata_clean, green_tripdata_clean, and vehicle_emissions can be found
 sources:
   - name: raw_data
-    description: "Raw taxi data loaded from NYC TLC (2015-2024)"
+    description: "Raw taxi data loaded from NYC TLC 2024"
     schema: main
     tables:
       - name: yellow_tripdata

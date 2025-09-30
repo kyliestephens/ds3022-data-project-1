@@ -1,3 +1,4 @@
+-- Transform and clean Yellow Taxi trip data
 SELECT 
     'yellow' as cab_type,
     VendorID,
@@ -24,7 +25,9 @@ SELECT
       ELSE 0
     END as avg_mph,
     
-    -- Calculate CO2 emissions (kg CO2 per mile for taxi = 0.404)
+    -- === Carbon emissions estimate ===
+    -- Multiplies distance by emission factor (grams CO2 per mile) from lookup table
+    -- Converts grams → kilograms by dividing by 1000
     ROUND(trip_distance * (
       SELECT co2_grams_per_mile / 1000.0 
       FROM {{ source('raw_data', 'vehicle_emissions') }} 
@@ -32,6 +35,7 @@ SELECT
     ), 4) as co2_emissions_kg
 
 FROM {{ source('raw_data', 'yellow_tripdata') }}
+-- === Data quality filters ===
 WHERE tpep_pickup_datetime IS NOT NULL
   AND tpep_dropoff_datetime IS NOT NULL
   AND trip_distance > 0

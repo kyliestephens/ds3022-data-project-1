@@ -1,6 +1,6 @@
-{{ config(materialized='table') }}
+{{ config(materialized='table') }} -- Materialize this model as a table (not a view) for efficiency in downstream queries
 
-SELECT 
+SELECT -- Select relevant, cleaned, and engineered columns
     cab_type,
     VendorID,
     pickup_datetime,
@@ -17,11 +17,12 @@ SELECT
     avg_mph,      
     co2_emissions_kg  
 
-FROM {{ ref('yellow_data') }}
+FROM {{ ref('yellow_data') }} -- reference the cleaned yellow taxi dataset
 
+-- Combine the yellow taxi data with the green taxi data
 UNION ALL
 
-SELECT 
+SELECT -- Select relevant, cleaned, and engineered columns
     cab_type,
     VendorID,
     pickup_datetime,
@@ -38,4 +39,4 @@ SELECT
     avg_mph,      
     co2_emissions_kg
 
-FROM {{ ref('green_data') }}
+FROM {{ ref('green_data') }} -- reference the cleaned green taxi dataset

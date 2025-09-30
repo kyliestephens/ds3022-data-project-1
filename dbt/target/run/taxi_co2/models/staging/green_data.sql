@@ -1,7 +1,8 @@
 
   
   create view "emissions"."main"."green_data__dbt_tmp" as (
-    SELECT 
+    -- Transform and clean Green Taxi trip data
+SELECT 
     'green' as cab_type,
     VendorID,
     lpep_pickup_datetime as pickup_datetime,
@@ -27,7 +28,9 @@
       ELSE 0
     END as avg_mph,
 
-    -- Calculate CO2 emissions (kg CO2 per mile for taxi = 0.404)
+    -- === Carbon emissions estimate ===
+    -- Multiplies distance by emission factor (grams CO2 per mile) from lookup table
+    -- Converts grams → kilograms by dividing by 1000
     ROUND(trip_distance * (
       SELECT co2_grams_per_mile / 1000.0 
       FROM "emissions"."main"."vehicle_emissions" 
@@ -36,6 +39,7 @@
 
 
 FROM "emissions"."main"."green_tripdata"
+-- === Data quality filters ===
 WHERE lpep_pickup_datetime IS NOT NULL
   AND lpep_dropoff_datetime IS NOT NULL
   AND trip_distance > 0
